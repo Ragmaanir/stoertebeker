@@ -1,9 +1,9 @@
-require "./messages"
+require "./client_messages"
 
 module Stoertebeker
   module Commands
     abstract class Command
-      include Messages
+      include ClientMessages
 
       getter client : Client
 
@@ -11,8 +11,13 @@ module Stoertebeker
       end
 
       def send_message(msg : Message)
-        logger.debug "SENDING: #{msg.to_json}"
         client.send(msg)
+      end
+
+      def receive_response
+        r = client.receive_response
+        logger.info "RESPONSE: #{r}"
+        r
       end
 
       private def logger
@@ -32,10 +37,34 @@ module Stoertebeker
       end
 
       def call
+        logger.info "BEGIN COMMAND: #{self.class.name}"
+
         send_message(GotoCommandMessage.new(uri))
+        response = receive_response
+
+        logger.info "END COMMAND: #{self.class.name}"
       end
 
       def_equals_and_hash client, uri
+    end
+
+    class ScreenshotCommand < Command
+      getter filename : String
+
+      def initialize(client, @filename)
+        super(client)
+      end
+
+      def call
+        logger.info "BEGIN COMMAND: #{self.class.name}"
+        send_message(ScreenshotCommandMessage.new(filename))
+
+        response = receive_response
+
+        logger.info "END COMMAND: #{self.class.name}"
+      end
+
+      def_equals_and_hash client, filename
     end
 
     class FillCommand < Command
@@ -79,6 +108,16 @@ module Stoertebeker
       end
 
       def_equals_and_hash client, selector
+    end
+
+    class QuitCommand < Command
+      def call
+        logger.info "BEGIN COMMAND: #{self.class.name}"
+        send_message(QuitCommandMessage.new)
+        logger.info "END COMMAND: #{self.class.name}"
+      end
+
+      def_equals_and_hash client
     end
   end # Commands
 end

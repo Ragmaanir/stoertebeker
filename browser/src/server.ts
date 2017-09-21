@@ -19,8 +19,9 @@ export let ClientMessages = {
 }
 
 export let ClientCommands = {
-  VISIT: "visit",
+  GOTO: "goto",
   SCREENSHOT: "screenshot",
+  QUIT: "quit"
 }
 
 export let ServerMessages = {
@@ -44,6 +45,9 @@ export class Server {
   registerWindowEvents(window : Window) {
     window.window.on("ready-to-show", (event : Event) => {
       this.window_ready = true
+      setTimeout(() => {
+        this.window.screenshot("comparison.png", () => {})
+      }, 1000)
       this.emit(ServerMessages.READY)
     })
   }
@@ -66,13 +70,14 @@ export class Server {
 
     ipc.serve(
       () => {
-        ipc.server.on("command", this.onCommand.bind(this))
+        //ipc.server.on("command", this.onCommand)
 
-        // ipc.server.on("command",
-        //   (data : any, socket : Socket) => {
-        //     this.onCommand(socket, Server.Messages.SCREENSHOT, data)
-        //   }
-        // )
+        ipc.server.on("command",
+          (data : any, socket : Socket) => {
+            console.log(data)
+            this.onCommand(data, socket)
+          }
+        )
 
         ipc.server.on(ClientMessages.CONNECT, this.onConnect)
 
@@ -94,9 +99,9 @@ export class Server {
 
     this.clients.push(socket)
 
-    if(this.window_ready) {
-      ipc.server.emit(socket, 'ready')
-    }
+    // if(this.window_ready) {
+    //   ipc.server.emit(socket, 'ready')
+    // }
   }
 
   onDisconnect(socket : Socket, destroyedSocketID : string) {
@@ -108,11 +113,12 @@ export class Server {
   }
 
   onCommand(data : any, socket : Socket) {
-    this.logSignal(`cmd ${data.command}`)
+    this.logSignal(`cmd ${data.type}`)
 
-    switch(data.command) {
-      case ClientCommands.VISIT: {
+    switch(data.type) {
+      case ClientCommands.GOTO: {
         this.window_ready = false
+        console.log(`GOTO ${data.url}`)
         this.window.loadUrl(data.url)
         break
       }
@@ -120,6 +126,15 @@ export class Server {
         this.window.screenshot(data.filename, () => {
           ipc.server.emit(socket, ServerMessages.SCREENSHOT)
         })
+        break
+      }
+      case ClientCommands.QUIT: {
+        ipc.log('Received: QUIT')
+        this.window.close()
+        break
+      }
+      default: {
+        ipc.log(`UNHANDLED COMMAND: ${data.type}`)
         break
       }
     }

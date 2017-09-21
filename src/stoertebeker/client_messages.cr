@@ -2,11 +2,20 @@ require "json"
 require "uri"
 
 module Stoertebeker
-  module Messages
+  module ClientMessages
     abstract class Message
       abstract def type : String
 
       abstract def to_json(b : JSON::Builder)
+
+      def to_json
+        io = IO::Memory.new
+        b = JSON::Builder.new(io)
+        b.document do
+          to_json(b)
+        end
+        io.to_s
+      end
     end
 
     abstract class CommandMessage < Message
@@ -17,7 +26,7 @@ module Stoertebeker
       def to_json(b : JSON::Builder)
         b.object do
           b.field "type", type
-          b.field "command" do
+          b.field "data" do
             cmd_json(b)
           end
         end
@@ -36,6 +45,20 @@ module Stoertebeker
         b.object do
           b.field "type", "goto"
           b.field "url", uri.to_s
+        end
+      end
+    end
+
+    class ScreenshotCommandMessage < CommandMessage
+      getter filename : String
+
+      def initialize(@filename)
+      end
+
+      def cmd_json(b : JSON::Builder)
+        b.object do
+          b.field "type", "screenshot"
+          b.field "filename", filename
         end
       end
     end
@@ -80,6 +103,14 @@ module Stoertebeker
         b.object do
           b.field "type", "wait"
           b.field "selector", selector
+        end
+      end
+    end
+
+    class QuitCommandMessage < CommandMessage
+      def cmd_json(b : JSON::Builder)
+        b.object do
+          b.field "type", "quit"
         end
       end
     end

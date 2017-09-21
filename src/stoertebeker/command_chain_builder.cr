@@ -31,6 +31,11 @@ module Stoertebeker
       self
     end
 
+    def screenshot(filename : String)
+      commands << ScreenshotCommand.new(client, filename)
+      self
+    end
+
     def fill(selector : String, value : String)
       commands << FillCommand.new(client, selector, value)
       self
