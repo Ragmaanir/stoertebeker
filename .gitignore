@@ -1,0 +1,13 @@
+/doc/
+/lib/
+/bin/
+/.shards/
+/browser/node_modules/
+/browser/.built
+
+# Libraries don't need dependency lock
+# Dependencies will be locked in application that uses them
+/shard.lock
+
+*.sublime-workspace
+*.sublime-project

@@ -1,0 +1,19 @@
+name: stoertebeker
+version: 0.1.0
+
+authors:
+  - Ragmaanir <ragmaanir@gmail.com>
+
+crystal: 0.23.1
+
+license: MIT
+
+development_dependencies:
+  microtest:
+    github: ragmaanir/microtest
+    branch: master
+
+dependencies:
+  kontrakt:
+    github: ragmaanir/kontrakt
+    version: ~> 0.1

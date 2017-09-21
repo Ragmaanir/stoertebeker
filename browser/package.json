@@ -1,0 +1,33 @@
+{
+  "name": "stoertebeker",
+  "version": "0.1.0",
+  "flat": "true",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node_modules/.bin/electron .built/index.js",
+    "test": "rm -rf .built_tests && cd test && tsc && ava --verbose --timeout=2s"
+  },
+  "ava": {
+    "files": [
+      ".built_tests/test/**/*.test.js"
+    ],
+    "source": [
+      ".built_tests/src/**/*.js"
+    ],
+    "concurrency": 1,
+    "failFast": true
+  },
+  "devDependencies": {
+    "@types/node-ipc": "^9.0.0",
+    "@types/power-assert": "^1.4.29",
+    "ava": "^0.22.0",
+    "awesome-typescript-loader": "^3.2.3",
+    "power-assert": "^1.4.4",
+    "source-map-loader": "^0.2.1",
+    "typescript": ""
+  },
+  "dependencies": {
+    "electron": "^1.7.6",
+    "node-ipc": "^9.1.1"
+  }
+}
