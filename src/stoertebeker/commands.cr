@@ -20,9 +20,40 @@ module Stoertebeker
         r
       end
 
+      def receive_confirmation_response(name : String)
+        r = client.receive_response
+        logger.info "RESPONSE: #{r}"
+        raise "Unexpected Response: #{r.type} != #{name}" unless r.type == name
+        r
+      end
+
       private def logger
         client.logger
       end
+
+      def call
+        logger.info "BEGIN COMMAND: #{self.class.name}"
+        call_impl
+        logger.info "END COMMAND: #{self.class.name}"
+      end
+
+      private abstract def call_impl
+    end
+
+    class WindowCommand < Command
+      getter width : Int32
+      getter height : Int32
+
+      def initialize(client, @width, @height)
+        super(client)
+      end
+
+      def call_impl
+        send_message(WindowCommandMessage.new(width, height))
+        receive_confirmation_response("window")
+      end
+
+      def_equals_and_hash client, uri
     end
 
     class GotoCommand < Command
@@ -36,13 +67,36 @@ module Stoertebeker
         super(client)
       end
 
-      def call
-        logger.info "BEGIN COMMAND: #{self.class.name}"
+      # def call_impl
+      #   send_message(GotoCommandMessage.new(uri))
+      #   msg = receive_confirmation_response("status")
 
+      #   status = msg.data["status"].as_i
+
+      #   if status != 200
+      #     url = msg.data["url"].as_s
+      #     desc = msg.data["message"]
+      #     raise "URL: #{url}, origURL: #{msg.data["originalURL"]?}, Status: #{status}, Msg: #{desc}"
+      #   end
+      #   receive_confirmation_response("ready")
+      # end
+
+      def call_impl
         send_message(GotoCommandMessage.new(uri))
-        response = receive_response
 
-        logger.info "END COMMAND: #{self.class.name}"
+        ready = false
+        completed = false
+
+        loop do
+          msg = receive_response
+
+          case msg.type
+          when "completed" then completed = true
+          when "ready"     then ready = true
+          end
+
+          break if completed && ready
+        end
       end
 
       def_equals_and_hash client, uri
@@ -55,13 +109,10 @@ module Stoertebeker
         super(client)
       end
 
-      def call
-        logger.info "BEGIN COMMAND: #{self.class.name}"
+      def call_impl
         send_message(ScreenshotCommandMessage.new(filename))
 
-        response = receive_response
-
-        logger.info "END COMMAND: #{self.class.name}"
+        receive_confirmation_response("screenshot")
       end
 
       def_equals_and_hash client, filename
@@ -75,7 +126,7 @@ module Stoertebeker
         super(client)
       end
 
-      def call
+      def call_impl
         send_message(FillCommandMessage.new(selector, value))
       end
 
@@ -89,7 +140,7 @@ module Stoertebeker
         super(client)
       end
 
-      def call
+      def call_impl
         send_message(ClickCommandMessage.new(selector))
       end
 
@@ -103,18 +154,39 @@ module Stoertebeker
         super(client)
       end
 
-      def call
+      def call_impl
         send_message(WaitCommandMessage.new(selector))
+
+        receive_confirmation_response("wait_success")
+      end
+
+      def_equals_and_hash client, selector
+    end
+
+    class EvaluateCommand < Command
+      getter script : String
+      getter callback : ((JSON::Any) ->) | Nil
+
+      def initialize(client, @script, @callback = nil)
+        super(client)
+      end
+
+      def call_impl
+        send_message(EvaluateCommandMessage.new(script))
+
+        r = receive_confirmation_response("evaluate")
+
+        if c = callback
+          c.call(r.data)
+        end
       end
 
       def_equals_and_hash client, selector
     end
 
     class QuitCommand < Command
-      def call
-        logger.info "BEGIN COMMAND: #{self.class.name}"
+      def call_impl
         send_message(QuitCommandMessage.new)
-        logger.info "END COMMAND: #{self.class.name}"
       end
 
       def_equals_and_hash client

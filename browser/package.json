@@ -27,7 +27,7 @@
     "typescript": ""
   },
   "dependencies": {
-    "electron": "^1.7.6",
+    "electron": "^1.7.7",
     "node-ipc": "^9.1.1"
   }
 }

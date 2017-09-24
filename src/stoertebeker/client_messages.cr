@@ -35,6 +35,22 @@ module Stoertebeker
       private abstract def cmd_json(b : JSON::Builder)
     end
 
+    class WindowCommandMessage < CommandMessage
+      getter width : Int32
+      getter height : Int32
+
+      def initialize(@width, @height)
+      end
+
+      def cmd_json(b : JSON::Builder)
+        b.object do
+          b.field "type", "window"
+          b.field "width", width
+          b.field "height", height
+        end
+      end
+    end
+
     class GotoCommandMessage < CommandMessage
       getter uri : URI
 
@@ -103,6 +119,20 @@ module Stoertebeker
         b.object do
           b.field "type", "wait"
           b.field "selector", selector
+        end
+      end
+    end
+
+    class EvaluateCommandMessage < CommandMessage
+      getter script : String
+
+      def initialize(@script)
+      end
+
+      def cmd_json(b : JSON::Builder)
+        b.object do
+          b.field "type", "evaluate"
+          b.field "script", script
         end
       end
     end

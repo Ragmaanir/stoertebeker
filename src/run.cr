@@ -2,56 +2,44 @@ require "./stoertebeker"
 
 include Stoertebeker
 
-logger = Logger.new(STDOUT)
-logger.level = Logger::DEBUG
+# logger = Logger.new(STDOUT)
+# logger.level = Logger::DEBUG
 
-client = Stoertebeker.run(logger)
+# client = Stoertebeker.new(logger)
 
-builder = CommandChainBuilder.new(client)
+# builder = CommandChainBuilder.new(client)
+# results = [] of String
 
-chain = CommandChain.new(client, [
-  GotoCommand.new(client, "localhost:3000"),
-  ScreenshotCommand.new(client, "yyy.png"),
-  # QuitCommand.new(client)
-  # FillCommand.new(client, "#search_form_input_homepage", "github nightmare"),
-  # ClickCommand.new(client, "#search_button_homepage"),
-  # WaitCommand.new(client, "#r1-0 a.result__a"),
-] of Command)
+# chain = builder
+#   .window(width: 1024, height: 768)
+#   .goto("localhost:3000")
+#   .wait_for(".topic_list .topic")
+#   # .screenshot("yyy.png")
+#   .evaluate("Array.prototype.slice.call(document.querySelectorAll(\".topic_list .topic .title\")).map(function(e){ return e.innerHTML })") { |result| results << result.to_s }
+#   .quit
+#   .result
+# # FillCommand.new(client, "#search_form_input_homepage", "github nightmare"),
+# # ClickCommand.new(client, "#search_button_homepage"),
+# # WaitCommand.new(client, "#r1-0 a.result__a"),
 
-client.run_command_chain(chain)
+# client.start
+# client.run_command_chain(chain)
 
-Fiber.yield
+# p results
 
-# include Stoertebeker::ServerResponses
+ctx = Stoertebeker::Context.new
 
-# spawn do
-#   client.socket.connect(client.server_address)
+ctx.run do
+  window(width: 1024, height: 768)
+  request("localhost:3000")
+  wait_for(".topic_list .topic")
+  evaluate("Array.prototype.slice.call(document.querySelectorAll(\".topic_list .topic .title\")).map(function(e){ return e.innerHTML })") { |result| p result }
+  screenshot("localhost.png")
+end
 
-#   client.send(ClientMessages::GotoCommandMessage.new(URI.parse("http://localhost:3000")))
-
-#   loop do
-#     logger.info "Receiving"
-#     msg, _ = client.socket.receive(512)
-#     p msg
-#     msg = msg.split("\f").first # FIXME partial messages?
-#     msg = Response.parse(msg)
-#     client.channel.send(msg)
-#   end
-# end
-
-# spawn do
-#   # loop do
-#   #   puts "Receiving on channel"
-#   #   msg = client.channel.receive
-#   #   logger.debug "RECEIVED: #{msg}"
-#   # end
-#   logger.info "spawned"
-#   chain.commands.each do |cmd|
-#     puts cmd.class
-#     cmd.call
-#     # msg = client.channel.receive
-#     # logger.debug "RECEIVED: #{msg}"
-#   end
-# end
-
-# Fiber.yield # FIXME required?
+ctx.run do
+  window(width: 1024, height: 768)
+  request("google.com")
+  # wait_for("form input")
+  screenshot("google.png")
+end

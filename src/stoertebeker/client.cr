@@ -30,9 +30,14 @@ module Stoertebeker
       logger.formatter = LOG_FORMATTER
       @socket = Socket.unix(blocking: true)
       @channel = Channel(Response).new
+
+      socket.read_timeout = 1.second
+      socket.write_timeout = 1.second
+      socket.keepalive = true
     end
 
     def start
+      socket.connect(server_address)
       # spawn_response_receiver
       # spawn_message_processor
 
@@ -85,20 +90,15 @@ module Stoertebeker
     # end
 
     def run_command_chain(chain : CommandChain)
-      logger.info("EXECUTING CHAIN")
-
-      socket.connect(server_address)
-
+      raise "Socket is closed" if socket.closed?
       chain.commands.each do |cmd|
         logger.info cmd.class
         cmd.call
       end
-
-      logger.info "EXITING"
     end
 
     def receive_response
-      msg, _ = socket.receive(512)
+      msg, _ = socket.receive(2048)
       logger.info "PACKET: #{msg}"
       msg = msg.split("\f").first # FIXME partial messages?
       msg = Response.parse(msg)
