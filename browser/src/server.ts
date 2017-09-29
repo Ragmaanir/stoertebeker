@@ -7,16 +7,6 @@ import {Window} from "./window"
 
 //const {ipcMain} = require('electron')
 
-// class Message {
-//   type : string
-//   data : object | null
-
-//   constructor(type : string, data : any) {
-//     this.type = type
-//     this.data = data
-//   }
-// }
-
 export let ClientMessages = {
   CONNECT: "connect",
   DISCONNECT: "socket.disconnect"
@@ -28,7 +18,8 @@ export let ClientCommands = {
   WAIT: "wait",
   EVALUATE: "evaluate",
   SCREENSHOT: "screenshot",
-  QUIT: "quit"
+  QUIT: "quit",
+  PING: "ping"
 }
 
 export let ServerMessages = {
@@ -40,7 +31,8 @@ export let ServerMessages = {
   STATUS: "status",
   READY: "ready",
   RESOURCE: "resource",
-  COMPLETED: "completed"
+  COMPLETED: "completed",
+  PONG: "pong"
 }
 
 export class Server {
@@ -156,6 +148,10 @@ export class Server {
     this.logSignal(`cmd ${data.type}`)
 
     switch(data.type) {
+      case ClientCommands.PING: {
+        this.emit(ServerMessages.PONG)
+        break
+      }
       case ClientCommands.WINDOW: {
         this.window.setSize(data.width, data.height)
         this.emit(ServerMessages.WINDOW)

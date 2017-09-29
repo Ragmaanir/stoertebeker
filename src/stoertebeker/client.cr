@@ -37,57 +37,12 @@ module Stoertebeker
     end
 
     def start
+      Stoertebeker.wait_for("Failed to connect to socket: #{server_address.path}") do
+        File.exists?(server_address.path)
+      end
+
       socket.connect(server_address)
-      # spawn_response_receiver
-      # spawn_message_processor
-
-      # Fiber.yield
     end
-
-    # def spawn_response_receiver
-    #   spawn do
-    #     socket.connect(server_address)
-
-    #     loop do
-    #       logger.info "Receiving"
-    #       msg, _ = socket.receive(512)
-    #       puts "received"
-    #       p msg
-    #       msg = msg.split("\f").first # FIXME partial messages?
-    #       msg = Response.parse(msg)
-    #       channel.send(msg)
-    #     end
-    #   end
-    # end
-
-    # def run_command_chain(chain : CommandChain)
-    #   logger.info("EXECUTING CHAIN")
-
-    #   spawn do
-    #     socket.connect(server_address)
-
-    #     Fiber.yield # send messages before receiving
-
-    #     loop do
-    #       logger.info "Receiving"
-    #       msg, _ = socket.receive(512)
-    #       logger.info "PACKET: #{msg}"
-    #       msg = msg.split("\f").first # FIXME partial messages?
-    #       msg = Response.parse(msg)
-    #       channel.send(msg)
-    #     end
-    #   end
-
-    #   spawn do
-    #     chain.commands.each do |cmd|
-    #       logger.info cmd.class
-    #       cmd.call
-    #     end
-    #   end
-
-    #   Fiber.yield # FIXME required?
-    #   logger.info "EXITING"
-    # end
 
     def run_command_chain(chain : CommandChain)
       raise "Socket is closed" if socket.closed?
@@ -99,44 +54,14 @@ module Stoertebeker
 
     def receive_response
       msg, _ = socket.receive(2048)
-      logger.info "PACKET: #{msg}"
       msg = msg.split("\f").first # FIXME partial messages?
       msg = Response.parse(msg)
     end
-
-    # def receive_response
-    #   # channel.wait_for_receive
-    #   # a = channel.receive_select_action
-    #   # channel.receive
-    #   # a.execute
-    #   channel.receive
-    # end
 
     def send(msg : Message)
       logger.debug "SENDING: #{msg.to_json}"
       socket.send(msg.to_json + "\f")
     end
-
-    # def spawn_message_processor
-    #   spawn do
-    #     loop do
-    #       msg = channel.receive
-
-    #       logger.debug "RECEIVED: #{msg.to_json}"
-
-    #       # case msg.type
-    #       # when "ready"
-    #       #   filename = File.join(Dir.current, "xxx.png")
-    #       #   send(Message.command("screenshot", {"filename" => filename}))
-    #       # when "screenshot.done"
-    #       #   send(Message.command("quit"))
-    #       #   s.close
-    #       #   logger.info "Exiting"
-    #       #   exit
-    #       # end
-    #     end
-    #   end
-    # end
   end # Client
 
   # class MockClient < Client

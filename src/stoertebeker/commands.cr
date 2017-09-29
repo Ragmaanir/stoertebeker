@@ -16,13 +16,13 @@ module Stoertebeker
 
       def receive_response
         r = client.receive_response
-        logger.info "RESPONSE: #{r}"
+        debug "RECEIVED: #{r}"
         r
       end
 
       def receive_confirmation_response(name : String)
         r = client.receive_response
-        logger.info "RESPONSE: #{r}"
+        debug "RECEIVED: #{r}"
         raise "Unexpected Response: #{r.type} != #{name}" unless r.type == name
         r
       end
@@ -31,13 +31,26 @@ module Stoertebeker
         client.logger
       end
 
+      private def debug(*args)
+        logger.debug(*args)
+      end
+
       def call
-        logger.info "BEGIN COMMAND: #{self.class.name}"
+        debug "BEGIN COMMAND: #{self.class.name}"
         call_impl
-        logger.info "END COMMAND: #{self.class.name}"
+        debug "END COMMAND: #{self.class.name}"
       end
 
       private abstract def call_impl
+    end
+
+    class PingCommand < Command
+      def call_impl
+        send_message(PingCommandMessage.new)
+        receive_confirmation_response("pong")
+      end
+
+      def_equals_and_hash client, uri
     end
 
     class WindowCommand < Command
@@ -66,20 +79,6 @@ module Stoertebeker
       def initialize(client, @uri)
         super(client)
       end
-
-      # def call_impl
-      #   send_message(GotoCommandMessage.new(uri))
-      #   msg = receive_confirmation_response("status")
-
-      #   status = msg.data["status"].as_i
-
-      #   if status != 200
-      #     url = msg.data["url"].as_s
-      #     desc = msg.data["message"]
-      #     raise "URL: #{url}, origURL: #{msg.data["originalURL"]?}, Status: #{status}, Msg: #{desc}"
-      #   end
-      #   receive_confirmation_response("ready")
-      # end
 
       def call_impl
         send_message(GotoCommandMessage.new(uri))

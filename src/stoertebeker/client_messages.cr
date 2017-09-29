@@ -35,6 +35,14 @@ module Stoertebeker
       private abstract def cmd_json(b : JSON::Builder)
     end
 
+    class PingCommandMessage < CommandMessage
+      def cmd_json(b : JSON::Builder)
+        b.object do
+          b.field "type", "ping"
+        end
+      end
+    end
+
     class WindowCommandMessage < CommandMessage
       getter width : Int32
       getter height : Int32
