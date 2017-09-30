@@ -1,7 +1,9 @@
 require "./stoertebeker/*"
 
 module Stoertebeker
-  SOCKET_FILE = "/tmp/app.stoertebeker"
+  SOCKET_FILE = File.expand_path("./temp/app.stoertebeker")
+  p SOCKET_FILE
+  p `ls #{File.expand_path("./temp")}`
 
   def self.wait_for(msg = "Timeout", tries = 5, &block : -> Bool)
     while (tries -= 1) >= 0
@@ -19,8 +21,8 @@ module Stoertebeker
     getter logger : Logger
     @server_process : Process?
 
-    def initialize(@logger : Logger = Logger.new(STDOUT), *args)
-      @client = RemoteClient.new(logger, *args)
+    def initialize(@logger : Logger = Logger.new(STDOUT), server_address = Socket::UNIXAddress.new(SOCKET_FILE), *args)
+      @client = RemoteClient.new(logger, server_address, *args)
     end
 
     def start_client
@@ -39,8 +41,15 @@ module Stoertebeker
       #   error: false,
       #   chdir: File.join(Dir.current, "tmp/")
       # )
-      @server_process = Process.new("./bin/server")
-      Stoertebeker.wait_for("Timeout looking for socket") { File.exists?(SOCKET_FILE) }
+      p `ls #{File.expand_path(".")}`
+      p `ls #{File.expand_path("./bin")}`
+      @server_process = Process.new("./bin/server", output: true, error: true)
+      Stoertebeker.wait_for("Timeout looking for socket") {
+        p File.expand_path("./temp")
+        p `ls #{File.expand_path("./temp")}`
+        puts `ps aux | grep electron`
+        File.exists?(client.server_address.path)
+      }
       logger.debug("Started electron server")
     end
 

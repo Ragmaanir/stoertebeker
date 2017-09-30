@@ -26,7 +26,7 @@ module Stoertebeker
     getter logger : Logger
     getter channel : Channel(Response)
 
-    def initialize(@logger = Logger.new(STDOUT), @server_address = Socket::UNIXAddress.new("/tmp/app.stoertebeker"))
+    def initialize(@logger, @server_address)
       logger.formatter = LOG_FORMATTER
       @socket = Socket.unix(blocking: true)
       @channel = Channel(Response).new

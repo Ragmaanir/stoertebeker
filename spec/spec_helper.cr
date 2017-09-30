@@ -6,7 +6,7 @@ require "../src/stoertebeker"
 include Microtest::DSL
 
 LOGGER = Logger.new(STDOUT)
-# LOGGER.level = Logger::DEBUG
+LOGGER.level = Logger::DEBUG
 
 CTX = Stoertebeker::Context.new(LOGGER)
 
@@ -23,7 +23,12 @@ Stoertebeker.run(CTX) do |ctx|
     end
     ctx.logger.debug("Started http server")
 
-    success = Microtest.run
+    success = Microtest.run([
+      Microtest::DescriptionReporter.new,
+      Microtest::ErrorListReporter.new,
+      Microtest::SlowTestsReporter.new,
+      Microtest::SummaryReporter.new,
+    ] of Microtest::Reporter)
   ensure
     ctx.logger.debug("Stopping http server")
     server_process.try(&.kill) rescue nil
