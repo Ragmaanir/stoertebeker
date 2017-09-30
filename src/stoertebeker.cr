@@ -70,19 +70,10 @@ module Stoertebeker
       ctx.start_server
       ctx.start_client
 
-      ctx.logger.debug("Starting http server")
-      server_proc = Process.fork do
-        HTTP::Server.new("localhost", 3001, [
-          HTTP::ErrorHandler.new,
-          HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
-        ]).listen
-      end
-
-      ctx.logger.debug("Started http server")
-
       yield ctx
     rescue e
       p e
+      raise e
     ensure
       ctx.ping
       ctx.stop_server rescue nil
