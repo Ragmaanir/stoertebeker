@@ -1,7 +1,8 @@
 language: crystal
 env:
-  - TRAVIS_NODE_VERSION="8.4"
+  - TRAVIS_NODE_VERSION="8.4" STOERTEBEKER_DEBUG="true"
 before_install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm install -g typescript
   - cd browser && npm install && cd ..
   - mkdir temp

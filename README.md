@@ -54,7 +54,7 @@ require "../src/stoertebeker/test_adapters/microtest"
 include Microtest::DSL
 
 LOGGER = Logger.new(STDOUT)
-# LOGGER.level = Logger::DEBUG
+LOGGER.level = Logger::DEBUG
 
 Stoertebeker.run_microtest(LOGGER) do
   HTTP::Server.new("localhost", 3001, [

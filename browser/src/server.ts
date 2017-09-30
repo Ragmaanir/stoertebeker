@@ -121,7 +121,6 @@ export class Server {
 
     ipc.config.id    = 'stoertebeker'
     ipc.config.socketRoot = dir
-
     // ipc.config.retry = 5
 
     this.registerMessages()
