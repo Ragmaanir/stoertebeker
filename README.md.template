@@ -22,7 +22,7 @@ require "stoertebeker"
 ```
 
 ### Example
-Currently you need to instantiate a context (might change soon, was experimenting a bit). The context creates the electron server (headless browser based on electron written in typescript) and the crystal client which communicate via IPC. The server accepts a series of commands which are sent by the client (like request-a-url or take-a-screenshot).
+Currently you need to instantiate a context (might change soon, was experimenting a bit). The context creates the electron server (headless browser based on electron, server written in typescript) and the crystal client which communicate via IPC. The server accepts a series of commands which are sent by the client (like request-a-url or take-a-screenshot).
 
 ```crystal
 # create the context

@@ -106,7 +106,6 @@ export class Server {
   createServer() {
     ipc.config.id    = 'stoertebeker'
     ipc.config.socketRoot = "../temp/"
-    console.log(ipc.config.socketRoot + ipc.config.appspace + ipc.config.id)
     // ipc.config.retry = 5
 
     this.registerMessages()
