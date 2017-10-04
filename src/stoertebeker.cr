@@ -39,7 +39,7 @@ module Stoertebeker
       #   error: false,
       #   chdir: File.join(Dir.current, "tmp/")
       # )
-      @server_process = Process.new("./bin/server", output: true, error: true)
+      @server_process = Process.new("./bin/server", output: false, error: true)
       Stoertebeker.wait_for("Timeout looking for socket") {
         File.exists?(client.server_address.path)
       }

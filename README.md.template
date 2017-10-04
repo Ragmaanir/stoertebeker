@@ -3,7 +3,7 @@
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 
 ### Version <%= Stoertebeker::VERSION %>
-This very alpha. PRs and help welcome!
+This is very alpha. PRs and help welcome!
 
 ## Installation
 
@@ -45,66 +45,20 @@ I recommend a separate test setup for integration tests (so it is easy to do dif
 
 ```crystal
 # spec_helper.cr
-require "microtest"
-require "http/server"
-
-require "stoertebeker"
-
-include Microtest::DSL
-
-LOGGER = Logger.new(STDOUT)
-
-CTX = Stoertebeker::Context.new(LOGGER)
-
-success = false
-
-Stoertebeker.run(CTX) do |ctx|
-  begin
-    # start your http server here
-    ctx.logger.debug("Starting http server")
-    server_process = Process.fork do
-      HTTP::Server.new("localhost", 3001, [
-        HTTP::ErrorHandler.new,
-        HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
-      ]).listen
-    end
-    ctx.logger.debug("Started http server")
-
-    success = Microtest.run
-  ensure
-    # make sure the http server is terminated. The electron server and crystal client should be terminated automatically (hopefully, multiple processes are a bitch).
-    ctx.logger.debug("Stopping http server")
-    server_process.try(&.kill) rescue nil
-    ctx.logger.debug("Stopped http server")
-  end
-end
-
-exit success ? 0 : -1
-
-# xyz_spec.cr
-require "./spec_helper"
-
-describe Stoertebeker do
-  test "static html example" do
-    CTX.run do |c|
-      c.request("localhost:3001/example.html")
-      c.wait_for("h1")
-      # c.screenshot("./test.png")
-    end
-  end
-
-  test "another static html example" do
-    CTX.run do |c|
-      c.request("localhost:3001/example.html")
-      c.wait_for("h1")
-      # c.screenshot("./another_test.png")
-    end
-  end
-end
-
+<%= `cat ./spec/spec_helper.cr` %>
 ```
 
-Minitest and the regular crystal spec setup should be similar.
+```crystal
+# example_spec.cr
+<%= `cat ./spec/example_spec.cr` %>
+```
+
+Minitest and the regular crystal spec setup should be similar:
+
+```crystal
+# Minitest test_helper.cr
+<%= `cat ./test/test_helper.cr` %>
+```
 
 ## TODO
 

@@ -3,7 +3,7 @@
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 
 ### Version 0.2.0
-This very alpha. PRs and help welcome!
+This is very alpha. PRs and help welcome!
 
 ## Installation
 
@@ -48,11 +48,12 @@ I recommend a separate test setup for integration tests (so it is easy to do dif
 require "microtest"
 require "http/server"
 
-require "stoertebeker"
+require "../src/stoertebeker"
 
 include Microtest::DSL
 
 LOGGER = Logger.new(STDOUT)
+# LOGGER.level = Logger::DEBUG
 
 CTX = Stoertebeker::Context.new(LOGGER)
 
@@ -60,7 +61,6 @@ success = false
 
 Stoertebeker.run(CTX) do |ctx|
   begin
-    # start your http server here
     ctx.logger.debug("Starting http server")
     server_process = Process.fork do
       HTTP::Server.new("localhost", 3001, [
@@ -70,9 +70,15 @@ Stoertebeker.run(CTX) do |ctx|
     end
     ctx.logger.debug("Started http server")
 
-    success = Microtest.run
+    success = Microtest.run([
+      Microtest::DescriptionReporter.new,
+      Microtest::ErrorListReporter.new,
+      Microtest::SlowTestsReporter.new,
+      Microtest::SummaryReporter.new,
+    ] of Microtest::Reporter)
   ensure
-    # make sure the http server is terminated. The electron server and crystal client should be terminated automatically (hopefully, multiple processes are a bitch).
+    # make sure the http server is terminated. The electron server and crystal
+    # client should be terminated automatically (hopefully, multiple processes are a bitch).
     ctx.logger.debug("Stopping http server")
     server_process.try(&.kill) rescue nil
     ctx.logger.debug("Stopped http server")
@@ -81,30 +87,77 @@ end
 
 exit success ? 0 : -1
 
-# xyz_spec.cr
+```
+
+```crystal
+# example_spec.cr
+require "./spec_helper"
+
 require "./spec_helper"
 
 describe Stoertebeker do
-  test "static html example" do
-    CTX.run do |c|
-      c.request("localhost:3001/example.html")
-      c.wait_for("h1")
-      # c.screenshot("./test.png")
-    end
-  end
+  FILE_PATH = File.expand_path("./temp/test.png")
 
-  test "another static html example" do
+  test "readme example" do
     CTX.run do |c|
       c.request("localhost:3001/example.html")
       c.wait_for("h1")
-      # c.screenshot("./another_test.png")
+      c.screenshot("../temp/test.png")
+
+      assert File.exists?(FILE_PATH)
+      assert File.size(FILE_PATH) > 0
+      File.delete(FILE_PATH)
+      assert c.current_url == "http://localhost:3001/example.html"
     end
   end
 end
 
 ```
 
-Minitest and the regular crystal spec setup should be similar.
+Minitest and the regular crystal spec setup should be similar:
+
+```crystal
+# Minitest test_helper.cr
+require "minitest"
+require "http/server"
+
+require "../src/stoertebeker"
+
+LOGGER = Logger.new(STDOUT)
+# LOGGER.level = Logger::DEBUG
+
+CTX = Stoertebeker::Context.new(LOGGER)
+
+success = false
+
+Stoertebeker.run(CTX) do |ctx|
+  begin
+    ctx.logger.debug("Starting http server")
+    server_process = Process.fork do
+      HTTP::Server.new("localhost", 3001, [
+        HTTP::ErrorHandler.new,
+        HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
+      ]).listen
+    end
+    ctx.logger.debug("Started http server")
+
+    success = Minitest.run(ARGV)
+  ensure
+    ctx.logger.debug("Stopping http server")
+    server_process.try(&.kill) rescue nil
+    ctx.logger.debug("Stopped http server")
+  end
+end
+
+class Test < Minitest::Test
+  def ctx
+    @ctx ||= CTX
+  end
+end
+
+exit success ? 0 : -1
+
+```
 
 ## TODO
 

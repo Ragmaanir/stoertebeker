@@ -47,7 +47,7 @@ module Stoertebeker
     def run_command_chain(chain : CommandChain)
       raise "Socket is closed" if socket.closed?
       chain.commands.each do |cmd|
-        logger.info cmd.class
+        logger.debug cmd.class
         cmd.call
       end
     end

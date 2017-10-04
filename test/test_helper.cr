@@ -1,9 +1,7 @@
-require "microtest"
+require "minitest"
 require "http/server"
 
 require "../src/stoertebeker"
-
-include Microtest::DSL
 
 LOGGER = Logger.new(STDOUT)
 # LOGGER.level = Logger::DEBUG
@@ -23,18 +21,17 @@ Stoertebeker.run(CTX) do |ctx|
     end
     ctx.logger.debug("Started http server")
 
-    success = Microtest.run([
-      Microtest::DescriptionReporter.new,
-      Microtest::ErrorListReporter.new,
-      Microtest::SlowTestsReporter.new,
-      Microtest::SummaryReporter.new,
-    ] of Microtest::Reporter)
+    success = Minitest.run(ARGV)
   ensure
-    # make sure the http server is terminated. The electron server and crystal
-    # client should be terminated automatically (hopefully, multiple processes are a bitch).
     ctx.logger.debug("Stopping http server")
     server_process.try(&.kill) rescue nil
     ctx.logger.debug("Stopped http server")
+  end
+end
+
+class Test < Minitest::Test
+  def ctx
+    @ctx ||= CTX
   end
 end
 
