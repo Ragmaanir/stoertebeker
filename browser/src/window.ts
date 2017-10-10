@@ -1,4 +1,4 @@
-import * as urlHelper from "url"
+// import * as urlHelper from "url"
 
 const electron = require('electron')
 const BrowserWindow = electron.BrowserWindow
@@ -26,12 +26,16 @@ export class Window {
     })
   }
 
+  // loadUrl(url : string) {
+  //   this.window.loadURL(urlHelper.format({
+  //     pathname: url,
+  //     protocol: 'http:',
+  //     slashes: true
+  //   }))
+  // }
+
   loadUrl(url : string) {
-    this.window.loadURL(urlHelper.format({
-      pathname: url,
-      protocol: 'http:',
-      slashes: true
-    }))
+    this.window.loadURL(url)
   }
 
   close() {

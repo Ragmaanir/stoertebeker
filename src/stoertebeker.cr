@@ -1,9 +1,11 @@
 require "./stoertebeker/*"
 
 module Stoertebeker
-  SOCKET_FILE = File.expand_path("./temp/app.stoertebeker")
+  SOCKET_DIR  = File.expand_path("./temp/")
+  SOCKET_FILE = File.join(SOCKET_DIR, "/app.stoertebeker")
+  ROOT_PATH   = File.real_path(File.join(File.dirname(__FILE__), ".."))
 
-  def self.wait_for(msg = "Timeout", tries = 5, &block : -> Bool)
+  def self.wait_for(msg = "wait_for timed out", tries = 5, &block : -> Bool)
     while (tries -= 1) >= 0
       return if block.call
       sleep 1
@@ -31,19 +33,26 @@ module Stoertebeker
     end
 
     def start_server
-      logger.debug("Starting electron server")
-      # @server_process = Process.new(
-      #   "./bin/server",
-      #   input: false,
-      #   output: false,
-      #   error: false,
-      #   chdir: File.join(Dir.current, "tmp/")
-      # )
-      @server_process = Process.new("./bin/server", output: false, error: true)
-      Stoertebeker.wait_for("Timeout looking for socket") {
-        File.exists?(client.server_address.path)
-      }
-      logger.debug("Started electron server")
+      Dir.cd(ROOT_PATH) do
+        logger.debug("Starting electron server")
+        # @server_process = Process.new(
+        #   "./bin/server",
+        #   input: false,
+        #   output: false,
+        #   error: false,
+        #   chdir: File.join(Dir.current, "tmp/")
+        # )
+        @server_process = Process.new(
+          "./bin/server",
+          env: {"SOCKET_DIR" => SOCKET_DIR},
+          output: false,
+          error: false
+        )
+        Stoertebeker.wait_for("Timeout looking for socket") {
+          File.exists?(client.server_address.path)
+        }
+        logger.debug("Started electron server")
+      end
     end
 
     def server_process

@@ -119,14 +119,18 @@ module Stoertebeker
 
     class WaitCommandMessage < CommandMessage
       getter selector : String
+      getter tries : Int32
+      getter delay : Int32
 
-      def initialize(@selector)
+      def initialize(@selector, @tries, @delay)
       end
 
       def cmd_json(b : JSON::Builder)
         b.object do
           b.field "type", "wait"
           b.field "selector", selector
+          b.field "tries", tries
+          b.field "delay", delay
         end
       end
     end

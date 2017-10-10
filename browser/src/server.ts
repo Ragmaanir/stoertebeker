@@ -39,10 +39,12 @@ export class Server {
   clients : Array<Socket> // FIXME change to single client?
   window : Window
   window_ready : boolean
+  loading : boolean
 
   constructor() {
     this.clients = []
     this.window_ready = false
+    this.loading = false
     this.window = new Window
     this.registerEvents(this.window)
     this.createServer()
@@ -51,11 +53,16 @@ export class Server {
   registerEvents(window : Window) {
     window.window.on("ready-to-show", (event : Event) => {
       this.window_ready = true
-      this.emit(ServerMessages.READY)
+      if(this.loading) {
+        this.emit(ServerMessages.READY)
+        this.loading = false
+      }
     })
 
     window.window.webContents.on("did-finish-load", () => {
-      this.emit(ServerMessages.STATUS, {status: 200})
+      if(this.loading) {
+        this.emit(ServerMessages.STATUS, {status: 200})
+      }
     })
 
     // window.window.webContents.on("did-get-response-details", (event: Event,
@@ -83,11 +90,13 @@ export class Server {
                                                      referrer: string,
                                                      headers: any,
                                                      resourceType: string) => {
-      this.emit(ServerMessages.COMPLETED, {
-        status: httpResponseCode,
-        url: newURL,
-        originalURL: originalURL
-      })
+      if(this.loading) {
+        this.emit(ServerMessages.COMPLETED, {
+          status: httpResponseCode,
+          url: newURL,
+          originalURL: originalURL
+        })
+      }
     })
 
     window.window.webContents.on("did-fail-load", (event: Event,
@@ -104,8 +113,15 @@ export class Server {
   }
 
   createServer() {
+    let dir = "../temp/"
+
+    if(dir = process.env.SOCKET_DIR) {
+      dir = dir+"/"
+    }
+
     ipc.config.id    = 'stoertebeker'
-    ipc.config.socketRoot = "../temp/"
+    ipc.config.socketRoot = dir
+
     // ipc.config.retry = 5
 
     this.registerMessages()
@@ -160,13 +176,18 @@ export class Server {
       }
       case ClientCommands.GOTO: {
         this.window_ready = false
+        // FIXME: somehow electron fails to load urls prefixed with http://
+        //const location = data.url.match("((.*)://)?(.*)")[3]
+        //this.window.loadUrl(location)
+        this.loading = true
         this.window.loadUrl(data.url)
         break
       }
       case ClientCommands.WAIT: {
         const selector = data.selector
         let tries = 0
-        let delay = 20
+        const delay = data.delay
+        const max_tries = data.tries
 
         const callback = () => {
           this.window.evaluateScript(`document.querySelector("${selector}")`, (result : any) => {
@@ -177,28 +198,26 @@ export class Server {
 
               this.emit(ServerMessages.WAIT_SUCCESS)
             } else {
-              // TODO implement back-off
-              if(tries > 10) {
-                delay = 50
-              }
-              if(tries < 20) {
+              if(tries < max_tries) {
                 tries++
                 this.wait(delay, callback)
               } else {
-                this.emit(ServerMessages.WAIT_FAILURE)
+                this.window.evaluateScript(`document.body.innerHTML`, (result : any) => {
+                  ipc.log(result.toString())
+                  this.emit(ServerMessages.WAIT_FAILURE, {body: result})
+                })
               }
             }
           })
         }
 
         callback()
+
         break
       }
       case ClientCommands.EVALUATE: {
         this.window.evaluateScript(data.script, (result : any) => {
-          this.wait(20, () => {
-            this.emit(ServerMessages.EVALUATE, result)
-          })
+          this.emit(ServerMessages.EVALUATE, result)
         })
         break
       }

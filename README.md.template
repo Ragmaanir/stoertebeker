@@ -45,25 +45,24 @@ I recommend a separate test setup for integration tests (so it is easy to do dif
 
 ```crystal
 # spec_helper.cr
-<%= `cat ./spec/spec_helper.cr` %>
+<%= File.read("./spec/spec_helper.cr") %>
 ```
 
 ```crystal
 # example_spec.cr
-<%= `cat ./spec/example_spec.cr` %>
+<%= File.read("./spec/example_spec.cr") %>
 ```
 
 Minitest and the regular crystal spec setup should be similar:
 
 ```crystal
 # Minitest test_helper.cr
-<%= `cat ./test/test_helper.cr` %>
+<%= File.read("./test/test_helper.cr") %>
 ```
 
 ## TODO
 
-- [ ] Multiple windows and parallel testing
-- [ ] Better specs
+<%= File.read("TODO.md") %>
 
 ## Development
 

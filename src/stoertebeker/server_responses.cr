@@ -22,7 +22,7 @@ module Stoertebeker
       end
 
       def to_s(io : IO)
-        io << "Response(#{type})"
+        io << "Response(#{type}, #{data})"
       end
     end
   end # ServerResponses

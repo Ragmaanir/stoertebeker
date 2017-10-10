@@ -16,8 +16,26 @@ module Stoertebeker
       GotoCommand.new(client, *args).call
     end
 
-    def wait_for(*args)
-      WaitCommand.new(client, *args).call
+    def wait_for(*args, **kwargs)
+      WaitCommand.new(client, *args, **kwargs).call
+    end
+
+    def click(selector)
+      result = evaluate <<-JAVASCRIPT
+        var elements = document.querySelectorAll("#{selector}");
+        var res = "";
+
+        if(elements.length == 1) {
+          elements[0].click();
+          res = "ok";
+        } else {
+          res = "Expected one element but got: " + elements.length;
+        }
+
+        res;
+      JAVASCRIPT
+
+      raise("Error: #{result}") if result != "ok"
     end
 
     def execute(*args)

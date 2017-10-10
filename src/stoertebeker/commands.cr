@@ -20,10 +20,16 @@ module Stoertebeker
         r
       end
 
-      def receive_confirmation_response(name : String)
+      def receive_confirmation_response(name : String, msg : String? = nil)
+        receive_confirmation_response(name, msg) do |r|
+          raise "Unexpected Response: #{r.type} != #{name} -- #{msg}"
+        end
+      end
+
+      def receive_confirmation_response(name : String, msg : String? = nil, &callback : (ServerResponses::Response) -> Nil)
         r = client.receive_response
         debug "RECEIVED: #{r}"
-        raise "Unexpected Response: #{r.type} != #{name}" unless r.type == name
+        callback.call(r) unless r.type == name
         r
       end
 
@@ -104,7 +110,8 @@ module Stoertebeker
     class ScreenshotCommand < Command
       getter filename : String
 
-      def initialize(client, @filename)
+      def initialize(client, filename)
+        @filename = File.expand_path(filename)
         super(client)
       end
 
@@ -141,6 +148,8 @@ module Stoertebeker
 
       def call_impl
         send_message(ClickCommandMessage.new(selector))
+
+        receive_confirmation_response("clicked")
       end
 
       def_equals_and_hash client, selector
@@ -148,15 +157,19 @@ module Stoertebeker
 
     class WaitCommand < Command
       getter selector : String
+      getter tries : Int32
+      getter delay : Int32
 
-      def initialize(client, @selector)
+      def initialize(client, @selector, @tries = 10, @delay = 20)
         super(client)
       end
 
       def call_impl
-        send_message(WaitCommandMessage.new(selector))
+        send_message(WaitCommandMessage.new(selector, tries, delay))
 
-        receive_confirmation_response("wait_success")
+        receive_confirmation_response("wait_success", "selector: #{selector}") do |r|
+          raise "Could not find selector #{selector} in document: #{r.data["body"]}"
+        end
       end
 
       def_equals_and_hash client, selector

@@ -49,43 +49,19 @@ require "microtest"
 require "http/server"
 
 require "../src/stoertebeker"
+require "../src/stoertebeker/test_adapters/microtest"
 
 include Microtest::DSL
 
 LOGGER = Logger.new(STDOUT)
 # LOGGER.level = Logger::DEBUG
 
-CTX = Stoertebeker::Context.new(LOGGER)
-
-success = false
-
-Stoertebeker.run(CTX) do |ctx|
-  begin
-    ctx.logger.debug("Starting http server")
-    server_process = Process.fork do
-      HTTP::Server.new("localhost", 3001, [
-        HTTP::ErrorHandler.new,
-        HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
-      ]).listen
-    end
-    ctx.logger.debug("Started http server")
-
-    success = Microtest.run([
-      Microtest::DescriptionReporter.new,
-      Microtest::ErrorListReporter.new,
-      Microtest::SlowTestsReporter.new,
-      Microtest::SummaryReporter.new,
-    ] of Microtest::Reporter)
-  ensure
-    # make sure the http server is terminated. The electron server and crystal
-    # client should be terminated automatically (hopefully, multiple processes are a bitch).
-    ctx.logger.debug("Stopping http server")
-    server_process.try(&.kill) rescue nil
-    ctx.logger.debug("Stopped http server")
-  end
+Stoertebeker.run_microtest(LOGGER) do
+  HTTP::Server.new("localhost", 3001, [
+    HTTP::ErrorHandler.new,
+    HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
+  ])
 end
-
-exit success ? 0 : -1
 
 ```
 
@@ -93,22 +69,18 @@ exit success ? 0 : -1
 # example_spec.cr
 require "./spec_helper"
 
-require "./spec_helper"
-
 describe Stoertebeker do
   FILE_PATH = File.expand_path("./temp/test.png")
 
   test "readme example" do
-    CTX.run do |c|
-      c.request("localhost:3001/example.html")
-      c.wait_for("h1")
-      c.screenshot("../temp/test.png")
+    request("http://localhost:3001/example.html")
+    wait_for("h1")
+    screenshot(FILE_PATH)
 
-      assert File.exists?(FILE_PATH)
-      assert File.size(FILE_PATH) > 0
-      File.delete(FILE_PATH)
-      assert c.current_url == "http://localhost:3001/example.html"
-    end
+    assert File.exists?(FILE_PATH)
+    assert File.size(FILE_PATH) > 0
+    File.delete(FILE_PATH)
+    assert current_url == "http://localhost:3001/example.html"
   end
 end
 
@@ -122,47 +94,30 @@ require "minitest"
 require "http/server"
 
 require "../src/stoertebeker"
+require "../src/stoertebeker/test_adapters/minitest"
 
 LOGGER = Logger.new(STDOUT)
-# LOGGER.level = Logger::DEBUG
 
-CTX = Stoertebeker::Context.new(LOGGER)
-
-success = false
-
-Stoertebeker.run(CTX) do |ctx|
-  begin
-    ctx.logger.debug("Starting http server")
-    server_process = Process.fork do
-      HTTP::Server.new("localhost", 3001, [
-        HTTP::ErrorHandler.new,
-        HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
-      ]).listen
-    end
-    ctx.logger.debug("Started http server")
-
-    success = Minitest.run(ARGV)
-  ensure
-    ctx.logger.debug("Stopping http server")
-    server_process.try(&.kill) rescue nil
-    ctx.logger.debug("Stopped http server")
-  end
+Stoertebeker.run_minitest(LOGGER) do
+  HTTP::Server.new("localhost", 3001, [
+    HTTP::ErrorHandler.new,
+    HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
+  ])
 end
-
-class Test < Minitest::Test
-  def ctx
-    @ctx ||= CTX
-  end
-end
-
-exit success ? 0 : -1
 
 ```
 
 ## TODO
 
-- [ ] Multiple windows and parallel testing
+
+- [ ] Multiple windows and parallel testing?
 - [ ] Better specs
+- [ ] Fix travis which seems to be tedious
+- [ ] Move from electron to [zombiejs](https://github.com/assaf/zombie)?? Looks like its faster, but it does not seem so active
+- [ ] Catch errors in electron thrown by evaluate script and return them to crystal
+- [ ] Use spawn instead of fork?
+- [ ] Find a way to avoid passing the logger as a constant
+
 
 ## Development
 
