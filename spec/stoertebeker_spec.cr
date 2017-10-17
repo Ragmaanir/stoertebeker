@@ -13,7 +13,9 @@ describe Stoertebeker do
   end
 
   test "another static html example" do
-    request("http://localhost:3001/example.html")
-    wait_for("h1")
+    request("http://localhost:3001/example2.html")
+    wait_for("form")
+    set_value(".textfield", "somevalue")
+    assert evaluate("document.querySelectorAll(\".textfield\")[0].value") == "somevalue"
   end
 end

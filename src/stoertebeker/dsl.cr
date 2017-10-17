@@ -38,6 +38,30 @@ module Stoertebeker
       raise("Error: #{result}") if result != "ok"
     end
 
+    def set_value(selector, value)
+      value = case value
+              when nil    then "null"
+              when String then value.inspect
+              else             value.to_s
+              end
+
+      result = evaluate <<-JAVASCRIPT
+        var elements = document.querySelectorAll("#{selector}");
+        var res = "";
+
+        if(elements.length == 1) {
+          elements[0].value = #{value};
+          res = "ok";
+        } else {
+          res = "Expected one element but got: " + elements.length;
+        }
+
+        res;
+      JAVASCRIPT
+
+      raise("Error: #{result}") if result != "ok"
+    end
+
     def execute(*args)
       EvaluateCommand.new(client, *args).call
     end

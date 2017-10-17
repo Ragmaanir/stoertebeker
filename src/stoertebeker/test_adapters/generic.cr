@@ -10,14 +10,16 @@ module Stoertebeker
         STOERTEBEKER_CONTEXT
       end
 
-      delegate request, screenshot, wait_for, click, evaluate, current_url, to: stoertebeker_context
+      delegate window, request, screenshot, wait_for, click, set_value, evaluate, current_url, to: stoertebeker_context
     end
 
     Stoertebeker.run(STOERTEBEKER_CONTEXT) do |ctx|
       begin
         ctx.logger.debug("Starting http server")
 
-        http_server = {{server.body}}
+        http_server = begin
+          {{server.body}}
+        end
 
         server_process = Process.fork do
           http_server.listen
