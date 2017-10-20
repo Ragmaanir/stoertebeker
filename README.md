@@ -119,6 +119,10 @@ end
 - [ ] Find a way to avoid passing the logger as a constant
 
 
+## Debugging
+
+Occasionally there are errors when running stoertebeker. This is often difficult to track down, especially since it involves IPC, javascript in electron and multiple processes. In order to have an easier time debugging you can set `STOERTEBEKER_DEBUG=true` so that all IPC commands etc are logged.
+
 ## Development
 
 Some internals:
