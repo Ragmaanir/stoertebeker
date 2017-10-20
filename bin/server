@@ -1,4 +1,10 @@
 #!/bin/bash
 #cd ./browser && npm start || echo "ERROR: Failed to start server"
+echo "--------------"
 ls browser/node_modules/.bin
-cd ./browser && echo "TSC" && tsc && echo "ELECTRON" && node_modules/.bin/electron .built/index.js
+echo "--------------"
+ls built
+echo "--------------"
+cd ./browser
+echo "TSC" && tsc
+echo "ELECTRON" && node_modules/.bin/electron .built/index.js --log --verbose || echo "FAILED"
