@@ -3,8 +3,7 @@
 echo "--------------"
 ls browser/node_modules/.bin
 echo "--------------"
+
+echo "TSC" && cd browser && tsc
 ls browser/built
-echo "--------------"
-cd ./browser
-echo "TSC" && tsc
-echo "ELECTRON" && node_modules/.bin/electron .built/index.js --log --verbose || echo "FAILED"
+echo "ELECTRON" && cd browser && node_modules/.bin/electron .built/index.js --log --verbose || echo "FAILED"
