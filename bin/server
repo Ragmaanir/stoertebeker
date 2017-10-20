@@ -1,4 +1,4 @@
 #!/bin/bash
-echo `ls`
-echo `ls ..`
-cd ./browser && npm start || echo "ERROR: Failed to start server"
+#cd ./browser && npm start || echo "ERROR: Failed to start server"
+ls browser/node_modules/.bin
+cd ./browser && echo "TSC" && tsc && echo "ELECTRON" && node_modules/.bin/electron .built/index.js
