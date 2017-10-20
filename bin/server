@@ -1,2 +1,4 @@
 #!/bin/bash
+echo `ls`
+echo `ls ..`
 cd ./browser && npm start || echo "ERROR: Failed to start server"
