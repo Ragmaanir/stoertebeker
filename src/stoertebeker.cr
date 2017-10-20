@@ -62,8 +62,8 @@ module Stoertebeker
         @server_process = Process.new(
           "./bin/server",
           env: {"SOCKET_DIR" => SOCKET_DIR},
-          output: debugging?,
-          error: debugging?
+          output: true,
+          error: true
         )
         Stoertebeker.wait_for("Timeout looking for socket", tries: 20, delay: 100) {
           File.exists?(client.server_address.path)

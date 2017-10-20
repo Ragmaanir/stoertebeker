@@ -3,7 +3,7 @@
 echo "--------------"
 ls browser/node_modules/.bin
 echo "--------------"
-ls built
+ls browser/built
 echo "--------------"
 cd ./browser
 echo "TSC" && tsc
