@@ -65,7 +65,7 @@ module Stoertebeker
           output: debugging?,
           error: debugging?
         )
-        Stoertebeker.wait_for("Timeout looking for socket", tries: 10, delay: 500) {
+        Stoertebeker.wait_for("Timeout looking for socket", tries: 100, delay: 500) {
           p SOCKET_DIR
           puts `ls -lah #{SOCKET_DIR}/..`
           File.exists?(client.server_address.path)
