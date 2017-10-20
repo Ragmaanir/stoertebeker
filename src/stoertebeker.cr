@@ -17,6 +17,7 @@ module Stoertebeker
   class Context
     include DSL
 
+    getter? debugging : Bool = ENV["STOERTEBEKER_DEBUG"]? == "true"
     getter client : RemoteClient
     getter logger : Logger
     @server_process : Process?
@@ -42,11 +43,21 @@ module Stoertebeker
         #   error: false,
         #   chdir: File.join(Dir.current, "tmp/")
         # )
+        err = IO::Memory.new
+        dir = File.join(ROOT_PATH, "browser")
+
+        status = Process.run("npm", ["install"], error: err, output: debugging?, chdir: dir)
+
+        if !status.success?
+          puts err
+          raise "npm install failed"
+        end
+
         @server_process = Process.new(
           "./bin/server",
           env: {"SOCKET_DIR" => SOCKET_DIR},
-          output: ENV["STOERTEBEKER_DEBUG"]? == "true",
-          error: ENV["STOERTEBEKER_DEBUG"]? == "true"
+          output: debugging?,
+          error: debugging?
         )
         Stoertebeker.wait_for("Timeout looking for socket") {
           File.exists?(client.server_address.path)
