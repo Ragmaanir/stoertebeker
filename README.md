@@ -118,6 +118,7 @@ end
 - [ ] Catch errors in electron thrown by evaluate script and return them to crystal
 - [ ] Use spawn instead of fork?
 - [ ] Find a way to avoid passing the logger as a constant
+- [ ] Think about: Does docker make sense for this project?
 
 
 ## Debugging
