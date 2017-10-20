@@ -120,6 +120,7 @@ export class Server {
     }
 
     ipc.config.id    = 'stoertebeker'
+    console.log("Socket Dir: "+dir)
     ipc.config.socketRoot = dir
     // ipc.config.retry = 5
 
