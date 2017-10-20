@@ -1,0 +1,4 @@
+#!/bin/bash
+
+crystal spec &&
+crystal run test/stoertebeker_test.cr

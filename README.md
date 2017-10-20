@@ -97,6 +97,7 @@ require "../src/stoertebeker"
 require "../src/stoertebeker/test_adapters/minitest"
 
 LOGGER = Logger.new(STDOUT)
+# LOGGER.level = Logger::DEBUG
 
 Stoertebeker.run_minitest(LOGGER) do
   HTTP::Server.new("localhost", 3001, [
@@ -132,6 +133,7 @@ Some internals:
 - Starting and stopping server and client is annoying and not exactly deterministic. I am no expert in that. But so far it works.
 - Only one window is used currently and the electron instance can only deal with one test at a time. But ideally it should probably be able to run several tests in parallel. Maybe this could be done with multiple electron server instances instead of complicating the test setup.
 - The `README.md` is generated from `README.md.template` by running `./build`. There is a pre-commit hook `hooks/pre-commit` that you can set up by symlinking it to `.git/hooks/pre-commit`.
+- run tests (microtest+minitest) by running `bin/spec`
 
 ## Contributing
 

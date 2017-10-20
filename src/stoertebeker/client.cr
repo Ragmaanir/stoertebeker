@@ -44,14 +44,6 @@ module Stoertebeker
       socket.connect(server_address)
     end
 
-    def run_command_chain(chain : CommandChain)
-      raise "Socket is closed" if socket.closed?
-      chain.commands.each do |cmd|
-        logger.debug cmd.class
-        cmd.call
-      end
-    end
-
     def receive_response
       msg, _ = socket.receive(2048)
       msg = msg.split("\f").first # FIXME partial messages?

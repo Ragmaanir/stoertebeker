@@ -17,5 +17,6 @@ describe Stoertebeker do
     wait_for("form")
     set_value(".textfield", "somevalue")
     assert evaluate("document.querySelectorAll(\".textfield\")[0].value") == "somevalue"
+    assert inner_html("h1") == "Example 2"
   end
 end

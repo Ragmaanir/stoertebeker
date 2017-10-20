@@ -5,27 +5,31 @@ module Stoertebeker
   SOCKET_FILE = File.join(SOCKET_DIR, "/app.stoertebeker")
   ROOT_PATH   = File.real_path(File.join(File.dirname(__FILE__), ".."))
 
-  def self.wait_for(msg = "wait_for timed out", tries = 5, &block : -> Bool)
+  # Waits for the block *tries* times to return true, waiting *delay* ms after each try.
+  def self.wait_for(msg = "wait_for timed out", tries = 5, delay = 1000, &block : -> Bool)
     while (tries -= 1) >= 0
       return if block.call
-      sleep 1
+      sleep Time::Span.new(0, 0, 0, 0, delay) # milliseconds
     end
 
     raise msg
   end
 
+  # Starts and terminates the electron server and connects the crystal client to it.
+  # Commands can be executed against the server vie IPC from this context, using the DSL methods.
   class Context
     include DSL
 
     getter? debugging : Bool = ENV["STOERTEBEKER_DEBUG"]? == "true"
     getter client : RemoteClient
     getter logger : Logger
-    @server_process : Process?
+    getter! server_process : Process?
 
     def initialize(@logger : Logger = Logger.new(STDOUT), server_address = Socket::UNIXAddress.new(SOCKET_FILE), *args)
       @client = RemoteClient.new(logger, server_address, *args)
     end
 
+    # Connects the client to the electron socket and pings the server.
     def start_client
       logger.debug("Starting client")
       @client.start
@@ -33,6 +37,8 @@ module Stoertebeker
       logger.debug("Pinged client")
     end
 
+    # Starts the electron server. It first runs npm install and raises if it fails.
+    # Waits for the socket file to be created.
     def start_server
       Dir.cd(ROOT_PATH) do
         logger.debug("Starting electron server")
@@ -66,27 +72,21 @@ module Stoertebeker
       end
     end
 
-    def server_process
-      @server_process.not_nil!
-    end
-
+    # Stops the server by firs sending the quit-command and then killing the process.
     def stop_server
       logger.debug("Stopping electron server")
-      quit
+      quit rescue nil
       # server_process.wait
-      server_process.kill
+      sleep 1
+      server_process.kill rescue nil
       logger.debug("Stopped electron server")
-    end
-
-    def run
-      yield(self)
     end
   end
 
+  # Starts the electron server and client, yields the block with the `Context` and
+  # terminates the electron server after the block finishes.
   def self.run(ctx : Stoertebeker::Context = Stoertebeker::Context.new)
     File.delete(SOCKET_FILE) if File.exists?(SOCKET_FILE)
-
-    server_proc = nil
 
     begin
       ctx.start_server
@@ -97,11 +97,8 @@ module Stoertebeker
       p e
       raise e
     ensure
-      ctx.ping
+      # ctx.ping
       ctx.stop_server rescue nil
-      ctx.logger.debug("Stopping http server")
-      server_proc.try(&.kill) rescue nil
-      ctx.logger.debug("Stopped http server")
     end
   end
 end

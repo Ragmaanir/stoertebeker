@@ -10,7 +10,7 @@ module Stoertebeker
         STOERTEBEKER_CONTEXT
       end
 
-      delegate window, request, screenshot, wait_for, click, set_value, evaluate, current_url, to: stoertebeker_context
+      delegate window, request, screenshot, wait_for, inner_html, click, set_value, evaluate, current_url, to: stoertebeker_context
     end
 
     Stoertebeker.run(STOERTEBEKER_CONTEXT) do |ctx|
