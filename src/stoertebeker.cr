@@ -65,7 +65,7 @@ module Stoertebeker
           output: true,
           error: true
         )
-        Stoertebeker.wait_for("Timeout looking for socket", tries: 20, delay: 100) {
+        Stoertebeker.wait_for("Timeout looking for socket", tries: 10, delay: 1000) {
           File.exists?(client.server_address.path)
         }
         logger.debug("Started electron server")
