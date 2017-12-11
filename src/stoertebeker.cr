@@ -52,7 +52,10 @@ module Stoertebeker
         err = IO::Memory.new
         dir = File.join(ROOT_PATH, "browser")
 
-        status = Process.run("npm", ["install"], error: err, output: debugging?, chdir: dir)
+        # output_method = debugging? ? Process::Redirect::Pipe : Process::Redirect::Close
+        output_method = debugging?
+
+        status = Process.run("npm", ["install"], error: err, output: output_method, chdir: dir)
 
         if !status.success?
           puts err
@@ -62,9 +65,10 @@ module Stoertebeker
         @server_process = Process.new(
           "./bin/server",
           env: {"SOCKET_DIR" => SOCKET_DIR},
-          output: debugging?,
-          error: debugging?
+          output: output_method,
+          error: output_method
         )
+
         Stoertebeker.wait_for("Timeout looking for socket") {
           File.exists?(client.server_address.path)
         }

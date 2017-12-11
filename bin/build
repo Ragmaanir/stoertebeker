@@ -1,7 +1,7 @@
 #!/usr/bin/env crystal
 
 require "ecr"
-require "./src/stoertebeker/version"
+require "../src/stoertebeker/version"
 
 puts "Building"
 

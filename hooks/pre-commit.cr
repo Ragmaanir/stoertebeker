@@ -1,6 +1,6 @@
 #!/usr/bin/env crystal
 
-system("./build")
+system("./bin/build")
 
 if /README\.md\.template/ === `git diff --staged --name-status README.md.template`
   unstaged = /README\.md[^\.]/ === `git diff --name-status README.md`
