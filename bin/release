@@ -9,8 +9,8 @@ def run(cmd, args = [] of String, msg = "Command failed: #{cmd} #{args.join(" ")
   s = Process.run(
     cmd,
     args,
-    output: Process::Redirect::Inherit,
-    error: Process::Redirect::Inherit
+    output: true, # Process::Redirect::Inherit
+    error: true   # Process::Redirect::Inherit
   )
 
   abort(msg) unless s.success?

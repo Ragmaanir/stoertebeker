@@ -115,8 +115,8 @@ export class Server {
   createServer() {
     let dir = "../temp/"
 
-    if(dir = process.env.SOCKET_DIR) {
-      dir = dir+"/"
+    if(process.env.SOCKET_DIR) {
+      dir = process.env.SOCKET_DIR+"/"
     }
 
     ipc.config.id    = 'stoertebeker'

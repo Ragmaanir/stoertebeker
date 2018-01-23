@@ -18,16 +18,17 @@
     "failFast": true
   },
   "devDependencies": {
-    "@types/node-ipc": "^9.0.0",
+    "@types/node-ipc": "^9.1.0",
     "@types/power-assert": "^1.4.29",
     "ava": "^0.22.0",
-    "awesome-typescript-loader": "^3.2.3",
+    "awesome-typescript-loader": "^3.4.1",
     "power-assert": "^1.4.4",
-    "source-map-loader": "^0.2.1",
+    "source-map-loader": "^0.2.3",
     "typescript": ""
   },
   "dependencies": {
-    "electron": "^1.7.7",
-    "node-ipc": "^9.1.1"
+    "electron": "^1.7.11",
+    "node-ipc": "^9.1.1",
+    "typescript": "^2.6.2"
   }
 }
