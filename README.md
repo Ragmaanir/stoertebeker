@@ -2,7 +2,7 @@
 
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 
-### Version 0.4.0
+### Version 0.4.1
 This is very alpha. PRs and help welcome!
 
 ## Installation
