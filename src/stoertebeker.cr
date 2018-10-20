@@ -6,10 +6,10 @@ module Stoertebeker
   ROOT_PATH   = File.real_path(File.join(File.dirname(__FILE__), ".."))
 
   # Waits for the block *tries* times to return true, waiting *delay* ms after each try.
-  def self.wait_for(msg = "wait_for timed out", tries = 5, delay = 1000, &block : -> Bool)
+  def self.wait_for(msg = "wait_for timed out", tries = 5, delay = 1.0, &block : -> Bool)
     while (tries -= 1) >= 0
       return if block.call
-      sleep Time::Span.new(0, 0, 0, 0, delay) # milliseconds
+      sleep delay
     end
 
     raise msg
@@ -52,8 +52,7 @@ module Stoertebeker
         err = IO::Memory.new
         dir = File.join(ROOT_PATH, "browser")
 
-        # output_method = debugging? ? Process::Redirect::Pipe : Process::Redirect::Close
-        output_method = debugging?
+        output_method = debugging? ? Process::Redirect::Pipe : Process::Redirect::Close
 
         status = Process.run("npm", ["install"], error: err, output: output_method, chdir: dir)
 

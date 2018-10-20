@@ -5,8 +5,6 @@ Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6r
 ### Version <%= Stoertebeker::VERSION %>
 This is very alpha. PRs and help welcome!
 
-**Note: Stoertebeker does not work with crystal 0.24. It seems like Process is broken in crystal after 0.23. **
-
 ## Installation
 
 Add this to your application's `shard.yml`:

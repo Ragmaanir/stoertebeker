@@ -2,10 +2,8 @@
 
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 
-### Version 0.3.0
+### Version 0.4.0
 This is very alpha. PRs and help welcome!
-
-**Note: Stoertebeker does not work with crystal 0.24. It seems like Process is broken in crystal after 0.23. **
 
 ## Installation
 
@@ -59,7 +57,7 @@ LOGGER = Logger.new(STDOUT)
 LOGGER.level = Logger::DEBUG
 
 Stoertebeker.run_microtest(LOGGER) do
-  HTTP::Server.new("localhost", 3001, [
+  HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
   ])
@@ -102,7 +100,7 @@ LOGGER = Logger.new(STDOUT)
 # LOGGER.level = Logger::DEBUG
 
 Stoertebeker.run_minitest(LOGGER) do
-  HTTP::Server.new("localhost", 3001, [
+  HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
   ])

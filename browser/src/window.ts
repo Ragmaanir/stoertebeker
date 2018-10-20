@@ -52,7 +52,7 @@ export class Window {
 
   screenshot(file : string, callback : () => void) : void {
     this.window.capturePage((img : typeof NativeImage) => {
-      require('fs').writeFile(file, img.toPng(), () => {
+      require('fs').writeFile(file, img.toPNG(), () => {
         callback()
       })
     })

@@ -1,4 +1,7 @@
 
+Version 0.4.0
+
+- crystal 0.26.1, electron 3.0.5
 - added inner_html command
 - added some documentation
 - removed some code

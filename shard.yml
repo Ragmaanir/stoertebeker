@@ -1,10 +1,10 @@
 name: stoertebeker
-version: 0.3.0
+version: 0.4.0
 
 authors:
   - Ragmaanir <ragmaanir@gmail.com>
 
-crystal: 0.23.1
+crystal: 0.26.1
 
 license: MIT
 
@@ -14,7 +14,7 @@ development_dependencies:
     branch: master
   minitest:
     github: ysbaddaden/minitest.cr
-    version: 0.3.5
+    version: 0.4.1
 
 dependencies:
   kontrakt:

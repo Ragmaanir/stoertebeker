@@ -17,23 +17,23 @@ module Stoertebeker
       begin
         ctx.logger.debug("Starting http server")
 
+        host = "localhost"
+        port = 3001
+
         http_server = begin
           {{server.body}}
         end
 
         server_process = Process.fork do
+          http_server.bind_tcp(host, port)
           http_server.listen
         end
 
-        scheme = {% if flag?(:without_openssl) %}
-          "http"
-        {% else %}
-          http_server.tls ? "https" : "http"
-        {% end %}
+        scheme = "http"
 
         Stoertebeker.wait_for do
           begin
-            url = "#{scheme}://#{http_server.host}:#{http_server.port}/"
+            url = "#{scheme}://#{host}:#{port}/"
             HTTP::Client.get(url).status_code != nil
           rescue e : Errno
             false
