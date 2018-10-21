@@ -4,7 +4,7 @@
   "flat": "true",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node_modules/.bin/electron .built/index.js",
+    "start": "tsc && node_modules/.bin/electron --headless --disable-gpu --enable-logging .built/index.js",
     "test": "rm -rf .built_tests && cd test && tsc && ava --verbose --timeout=2s"
   },
   "ava": {
