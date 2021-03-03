@@ -46,12 +46,12 @@ export class Window {
     this.window.setSize(w, h)
   }
 
-  evaluateScript(script : string, callback : (result : any) => void) {
-    this.window.webContents.executeJavaScript(script, callback)
+  evaluateScript(script : string) {
+    return this.window.webContents.executeJavaScript(script)
   }
 
   screenshot(file : string, callback : () => void) : void {
-    this.window.capturePage((img : typeof NativeImage) => {
+    this.window.capturePage().then((img : typeof NativeImage) => {
       require('fs').writeFile(file, img.toPNG(), () => {
         callback()
       })
@@ -59,7 +59,7 @@ export class Window {
   }
 
   savePage(file : string, callback : () => void) {
-    this.window.webContents.savePage(file, 'HTMLComplete', (error : typeof Error) => {
+    this.window.webContents.savePage(file, 'HTMLComplete').then((error : typeof Error) => {
       if (!error) {
         callback()
       } else {

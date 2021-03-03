@@ -1,3 +1,3 @@
 module Stoertebeker
-  VERSION = "0.4.1"
+  VERSION = {{ `shards version #{__DIR__}`.strip.stringify }}
 end

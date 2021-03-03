@@ -16,7 +16,7 @@ module Stoertebeker
 
       def receive_response
         r = client.receive_response
-        debug "RECEIVED: #{r}"
+        Log.debug { "RECEIVED: #{r}" }
         r
       end
 
@@ -28,23 +28,15 @@ module Stoertebeker
 
       def receive_confirmation_response(name : String, msg : String? = nil, &callback : (ServerResponses::Response) -> Nil)
         r = client.receive_response
-        debug "RECEIVED: #{r}"
+        Log.debug { "RECEIVED: #{r}" }
         callback.call(r) unless r.type == name
         r
       end
 
-      private def logger
-        client.logger
-      end
-
-      private def debug(*args)
-        logger.debug(*args)
-      end
-
       def call
-        debug "BEGIN COMMAND: #{self.class.name}"
+        Log.debug { "BEGIN COMMAND: #{self.class.name}" }
         call_impl
-        debug "END COMMAND: #{self.class.name}"
+        Log.debug { "END COMMAND: #{self.class.name}" }
       end
 
       private abstract def call_impl

@@ -1,4 +1,4 @@
-# stoertebeker [![Build Status](https://travis-ci.org/Ragmaanir/stoertebeker.svg?branch=master)](https://travis-ci.org/Ragmaanir/stoertebeker)[![Dependency Status](https://shards.rocks/badge/github/ragmaanir/stoertebeker/status.svg)](https://shards.rocks/github/ragmaanir/stoertebeker)
+# stoertebeker [![Build Status](https://travis-ci.org/Ragmaanir/stoertebeker.svg?branch=master)](https://travis-ci.org/Ragmaanir/stoertebeker)
 
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 
@@ -53,10 +53,9 @@ require "../src/stoertebeker/test_adapters/microtest"
 
 include Microtest::DSL
 
-LOGGER = Logger.new(STDOUT)
-LOGGER.level = Logger::DEBUG
+Log.setup(:info)
 
-Stoertebeker.run_microtest(LOGGER) do
+Stoertebeker.run_microtest do
   HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),
@@ -96,10 +95,9 @@ require "http/server"
 require "../src/stoertebeker"
 require "../src/stoertebeker/test_adapters/minitest"
 
-LOGGER = Logger.new(STDOUT)
-# LOGGER.level = Logger::DEBUG
+Log.setup(:info)
 
-Stoertebeker.run_minitest(LOGGER) do
+Stoertebeker.run_minitest do
   HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),

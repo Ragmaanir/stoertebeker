@@ -5,6 +5,8 @@ module Stoertebeker
   SOCKET_FILE = File.join(SOCKET_DIR, "/app.stoertebeker")
   ROOT_PATH   = File.real_path(File.join(File.dirname(__FILE__), ".."))
 
+  Log = ::Log.for("Stoertebeker")
+
   # Waits for the block *tries* times to return true, waiting *delay* ms after each try.
   def self.wait_for(msg = "wait_for timed out", tries = 5, delay = 1.0, &block : -> Bool)
     while (tries -= 1) >= 0
@@ -22,26 +24,25 @@ module Stoertebeker
 
     getter? debugging : Bool = ENV["STOERTEBEKER_DEBUG"]? == "true"
     getter client : RemoteClient
-    getter logger : Logger
     getter! server_process : Process?
 
-    def initialize(@logger : Logger = Logger.new(STDOUT), server_address = Socket::UNIXAddress.new(SOCKET_FILE), *args)
-      @client = RemoteClient.new(logger, server_address, *args)
+    def initialize(server_address = Socket::UNIXAddress.new(SOCKET_FILE), *args)
+      @client = RemoteClient.new(server_address, *args)
     end
 
     # Connects the client to the electron socket and pings the server.
     def start_client
-      logger.debug("Starting client")
+      Log.debug { "Starting client" }
       @client.start
       ping
-      logger.debug("Pinged client")
+      Log.debug { "Pinged client" }
     end
 
     # Starts the electron server. It first runs npm install and raises if it fails.
     # Waits for the socket file to be created.
     def start_server
       Dir.cd(ROOT_PATH) do
-        logger.debug("Starting electron server")
+        Log.debug { "Starting electron server" }
         # @server_process = Process.new(
         #   "./bin/server",
         #   input: false,
@@ -52,7 +53,7 @@ module Stoertebeker
         err = IO::Memory.new
         dir = File.join(ROOT_PATH, "browser")
 
-        output_method = debugging? ? Process::Redirect::Pipe : Process::Redirect::Close
+        output_method = debugging? ? STDOUT : Process::Redirect::Close
 
         status = Process.run("npm", ["install"], error: err, output: output_method, chdir: dir)
 
@@ -71,18 +72,18 @@ module Stoertebeker
         Stoertebeker.wait_for("Timeout looking for socket") {
           File.exists?(client.server_address.path)
         }
-        logger.debug("Started electron server")
+        Log.debug { "Started electron server" }
       end
     end
 
     # Stops the server by firs sending the quit-command and then killing the process.
     def stop_server
-      logger.debug("Stopping electron server")
+      Log.debug { "Stopping electron server" }
       quit rescue nil
       # server_process.wait
       sleep 1
-      server_process.kill rescue nil
-      logger.debug("Stopped electron server")
+      server_process.signal(Signal::TERM) rescue nil
+      Log.debug { "Stopped electron server" }
     end
   end
 

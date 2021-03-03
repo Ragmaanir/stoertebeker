@@ -1,21 +1,19 @@
-require "logger"
 require "socket"
 
 require "./client_messages"
 require "./server_responses"
 
 module Stoertebeker
-  LOG_FORMATTER = Logger::Formatter.new do |severity, datetime, progname, message, io|
-    io << datetime.to_s("%Y-%m-%d %H:%M:%S : ")
-    io << message
-  end
+  # LOG_FORMATTER = Logger::Formatter.new do |severity, datetime, progname, message, io|
+  #   io << datetime.to_s("%Y-%m-%d %H:%M:%S : ")
+  #   io << message
+  # end
 
   abstract class Client
     include ClientMessages
     include ServerResponses
 
-    abstract def logger : Logger
-    abstract def channel : Channel(Message)
+    abstract def channel : Channel(Response)
     abstract def start
     abstract def send(msg : Message)
   end
@@ -23,11 +21,10 @@ module Stoertebeker
   class RemoteClient < Client
     getter server_address : Socket::UNIXAddress
     getter socket : Socket
-    getter logger : Logger
     getter channel : Channel(Response)
 
-    def initialize(@logger, @server_address)
-      logger.formatter = LOG_FORMATTER
+    def initialize(@server_address)
+      # logger.formatter = LOG_FORMATTER
       @socket = Socket.unix(blocking: true)
       @channel = Channel(Response).new
 
@@ -47,11 +44,11 @@ module Stoertebeker
     def receive_response
       msg, _ = socket.receive(2048)
       msg = msg.split("\f").first # FIXME partial messages?
-      msg = Response.parse(msg)
+      Response.parse(msg)
     end
 
     def send(msg : Message)
-      logger.debug "SENDING: #{msg.to_json}"
+      Log.debug { "SENDING: #{msg.to_json}" }
       socket.send(msg.to_json + "\f")
     end
   end # Client

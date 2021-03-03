@@ -19,7 +19,7 @@ module Stoertebeker
     end
 
     abstract class CommandMessage < Message
-      def type
+      def type : String
         "command"
       end
 

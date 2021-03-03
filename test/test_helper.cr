@@ -4,10 +4,9 @@ require "http/server"
 require "../src/stoertebeker"
 require "../src/stoertebeker/test_adapters/minitest"
 
-LOGGER = Logger.new(STDOUT)
-# LOGGER.level = Logger::DEBUG
+Log.setup(:info)
 
-Stoertebeker.run_minitest(LOGGER) do
+Stoertebeker.run_minitest do
   HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),

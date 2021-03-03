@@ -6,10 +6,9 @@ require "../src/stoertebeker/test_adapters/microtest"
 
 include Microtest::DSL
 
-LOGGER = Logger.new(STDOUT)
-LOGGER.level = Logger::DEBUG
+Log.setup(:info)
 
-Stoertebeker.run_microtest(LOGGER) do
+Stoertebeker.run_microtest do
   HTTP::Server.new([
     HTTP::ErrorHandler.new,
     HTTP::StaticFileHandler.new("./spec/public", directory_listing: false),

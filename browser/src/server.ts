@@ -190,20 +190,18 @@ export class Server {
         const max_tries = data.tries
 
         const callback = () => {
-          this.window.evaluateScript(`document.querySelector("${selector}")`, (result : any) => {
-            if(result != null) {
+          this.window.evaluateScript(`document.querySelector("${selector}") != null`).then((result : any) => {
+            if(result) {
               // this.waitForPaint(() => {
               //   this.emit(ServerMessages.WAIT_SUCCESS)
               // })
-
               this.emit(ServerMessages.WAIT_SUCCESS)
             } else {
               if(tries < max_tries) {
                 tries++
                 this.wait(delay, callback)
               } else {
-                this.window.evaluateScript(`document.body.innerHTML`, (result : any) => {
-                  ipc.log(result.toString())
+                this.window.evaluateScript(`document.body.innerHTML`).then((result : any) => {
                   this.emit(ServerMessages.WAIT_FAILURE, {body: result})
                 })
               }
@@ -216,7 +214,7 @@ export class Server {
         break
       }
       case ClientCommands.EVALUATE: {
-        this.window.evaluateScript(data.script, (result : any) => {
+        this.window.evaluateScript(data.script).then((result : any) => {
           this.emit(ServerMessages.EVALUATE, result)
         })
         break
@@ -225,6 +223,7 @@ export class Server {
         this.window.screenshot(data.filename, () => {
           this.emit(ServerMessages.SCREENSHOT)
         })
+
         break
       }
       case ClientCommands.QUIT: {

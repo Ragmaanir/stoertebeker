@@ -1,4 +1,4 @@
-# stoertebeker [![Build Status](https://travis-ci.org/Ragmaanir/stoertebeker.svg?branch=master)](https://travis-ci.org/Ragmaanir/stoertebeker)[![Dependency Status](https://shards.rocks/badge/github/ragmaanir/stoertebeker/status.svg)](https://shards.rocks/github/ragmaanir/stoertebeker)
+# stoertebeker [![Build Status](https://travis-ci.org/Ragmaanir/stoertebeker.svg?branch=master)](https://travis-ci.org/Ragmaanir/stoertebeker)
 
 Headless (pun about [Störtebeker](https://en.wikipedia.org/wiki/Klaus_St%C3%B6rtebeker)) integration testing of crystal web-applications.
 

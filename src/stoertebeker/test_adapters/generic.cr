@@ -1,7 +1,6 @@
 module Stoertebeker
-  macro run_tests(logger, test_context, test_runner, &server)
-    {% raise("Logger needs to be a constant #{logger.id}") unless logger.class_name == "Path" && logger.resolve %}
-    STOERTEBEKER_CONTEXT = Stoertebeker::Context.new({{logger}})
+  macro run_tests(test_context, test_runner, &server)
+    STOERTEBEKER_CONTEXT = Stoertebeker::Context.new
 
     success = false
 
@@ -15,7 +14,7 @@ module Stoertebeker
 
     Stoertebeker.run(STOERTEBEKER_CONTEXT) do |ctx|
       begin
-        ctx.logger.debug("Starting http server")
+        Log.debug{"Starting http server"}
 
         host = "localhost"
         port = 3001
@@ -35,20 +34,20 @@ module Stoertebeker
           begin
             url = "#{scheme}://#{host}:#{port}/"
             HTTP::Client.get(url).status_code != nil
-          rescue e : Errno
+          rescue
             false
           end
         end
 
-        ctx.logger.debug("Started http server")
+        Log.debug{"Started http server"}
 
         success = {{test_runner}}
       ensure
         # make sure the http server is terminated. The electron server and crystal
         # client should be terminated automatically (hopefully, multiple processes are a bitch).
-        ctx.logger.debug("Stopping http server")
-        server_process.try(&.kill) rescue nil
-        ctx.logger.debug("Stopped http server")
+        Log.debug{"Stopping http server"}
+        server_process.try(&.signal(Signal::TERM)) rescue nil
+        Log.debug{"Stopped http server"}
       end
     end
 

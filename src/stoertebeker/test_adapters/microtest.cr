@@ -9,9 +9,8 @@ module Stoertebeker
     Microtest::SummaryReporter.new,
   ] of Microtest::Reporter
 
-  macro run_microtest(logger, reporters = Stoertebeker::DEFAULT_MICROTEST_REPORTERS, &server)
+  macro run_microtest(reporters = Stoertebeker::DEFAULT_MICROTEST_REPORTERS, &server)
     Stoertebeker.run_tests(
-      {{logger.id}},
       Microtest::Test,
       Microtest.run({{reporters}})
     ) {{server.id}}

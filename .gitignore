@@ -1,9 +1,10 @@
+/bin/ameba
 /doc/
 /lib/
-/.shards/
 /browser/node_modules/
 /browser/.built
 /temp
+/logs
 
 # Libraries don't need dependency lock
 # Dependencies will be locked in application that uses them
